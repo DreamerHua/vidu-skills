@@ -97,16 +97,35 @@ Get public download URL(s) for one or more uploaded resources identified by `ssu
 
 ---
 
-## 3c. Create material element (创建主体)
+## 3b. Pre-process material element (主体预处理)
 
-**POST** `/vidu/v1/material/elements`
+**POST** `/vidu/v1/material/elements/pre-process`
 
-Create a material element (subject) with 1–3 images, a name, and a description. Images must be uploaded first (sections 1–3); use the returned `ssupload:?id=...` in `components`.
+Pre-process before creating a material element. **This step is required** — call it before every create-element request, whether or not the user provides a description. The response `recaption` (style, description) can be used to fill the subject description when not specially specified.
 
 **Request body:**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| components | array | yes | 1–3 items. One with `type: "main"`, rest with `type: "auxiliary"`. Each: `content`, `src_img` (both `ssupload:?id=...`), `content_type: "image"` |
+| name | string | yes | Subject name (e.g. element_name) |
+| type | string | yes | `"user"` |
+
+**Response:** `id`, `name`, `type`, `creator_id`, `recaption` (object with `style`, `description` — vidu-generated description), `modality`. Use `recaption.description` and optionally `recaption.style` in the create-element body when the user does not provide them.
+
+---
+
+## 3c. Create material element (创建主体)
+
+**POST** `/vidu/v1/material/elements`
+
+Create a material element (subject) with 1–3 images, a name, and a description. **Pre-process (3b) is required before every create** — call it first, then use the **pre-process response `id`** in this request body, along with the same `components` and either user-provided or pre-process `recaption`. Images must be uploaded first (sections 1–3); use the returned `ssupload:?id=...` in `components`.
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | string/number | yes | Element id from pre-process (3b) response; must be included when creating |
 | name | string | yes | Subject name |
 | modality | string | yes | `"image"` |
 | type | string | yes | `"user"` |
@@ -144,7 +163,7 @@ Create a material element (subject) with 1–3 images, a name, and a description
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| prompts | array | yes | List of prompt objects (text, image, and/or material). Max 20. For character2video include one `type: "material"` with `material: { id, version }`. |
+| prompts | array | yes | List of prompt objects (text, image, and/or material). Max 20. For character2video: **text required**; image + material combined at most 7 (图+主体合计最多7). |
 | editor_mode | string | no | `"normal"` typical |
 | enhance | boolean | no | Default true (recaption for text) |
 

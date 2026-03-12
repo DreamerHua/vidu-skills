@@ -12,12 +12,12 @@
 | 图生视频 | img2video | 一张图 + 一段文字 | Q2 | 2–8 | 依据输入图，不传 | pro, speed | 1080p |
 | 首尾帧生视频 | headtailimg2video | **两张图 + 一段文字** | Q3 | 1–16 | — | pro, speed | 1080p |
 | 首尾帧生视频 | headtailimg2video | 两张图 + 一段文字 | Q2 | 2–8 | — | pro, speed | 1080p |
-| 参考生视频 | character2video | **多张图(最多7张) + 一段文字** | Q2 | 2–8 | — | **不传** | 1080p |
+| 参考生视频 | character2video | **图+主体+文字（文字必填；图+主体合计最多7）** | Q2 | 2–8 | — | **不传** | 1080p |
 
 - **文生视频**: 只传文字。Q2 时不要传 transition。
 - **图生视频**: 仅 1 张图片 + 1 段文字；宽高比由输入图决定，**不要传 aspect_ratio**。
 - **首尾帧生视频**: 固定 2 张图（首帧、尾帧）+ 1 段文字。
-- **参考生视频**: 2–7 张图 + 1 段文字；仅 Q2，**不要传 transition**。
+- **参考生视频**: 图+主体+文字（**文字必填**；图+主体合计最多 7，至少一种）；仅 Q2，**不要传 transition**。
 
 ---
 
@@ -28,7 +28,7 @@
 | text2video | 文生视频：prompts 仅文字 |
 | img2video | 图生视频：1 张图 + 1 段文字 |
 | headtailimg2video | 首尾帧生视频：2 张图 + 1 段文字 |
-| character2video | 参考生视频：2–7 张图 + 1 段文字（仅 Q2） |
+| character2video | 参考生视频：图+主体+文字（文字必填；图+主体合计最多7，仅 Q2） |
 
 ---
 
@@ -39,7 +39,7 @@
 - **Text prompt**: `{"type": "text", "content": "<string>"}`. Max length 4096.
 - **Image prompt**: `{"type": "image", "content": "ssupload:?id=<upload_id>", "src_imgs": [...], "selected_region": {...}}`. Optional: `src_imgs`, `selected_region`.
 
-Order: for headtailimg2video use [text, image1, image2] (首帧、尾帧). For character2video: one text + multiple image prompts (2–7 images).
+Order: for headtailimg2video use [text, image1, image2] (首帧、尾帧). For character2video: **text prompt required**; image + material combined at most 7 (图+主体合计最多7).
 
 ### input.editor_mode
 
