@@ -1,13 +1,13 @@
 ---
 name: vidu-skills
 description: Generate video and images by calling the official Vidu API via vidu CLI. Use when the user wants text-to-image (文生图), text-to-video (文生视频), image-to-video (图生视频), head-tail-image-to-video (首尾帧生视频), reference-to-image (参考生图), reference-to-video (参考生视频), Create References (创建参考资料), or to submit or check Vidu tasks. Requires VIDU_TOKEN and optional VIDU_BASE_URL.
-compatibility: Requires Python 3 and vidu CLI (scripts/vidu-cli). Set VIDU_TOKEN in the environment; VIDU_BASE_URL optional (default https://service.vidu.cn).
+compatibility: Requires vidu-cli (install via `cargo install vidu-cli`). Set VIDU_TOKEN in the environment; VIDU_BASE_URL optional (default https://service.vidu.cn).
 version: 1.2.0
 url: https://www.vidu.cn/
 secrets:
   - VIDU_TOKEN
 dependencies:
-  - python3
+  - cargo
 ---
 
 # Vidu Video and Image Generation Skill (Vidu 音视频/图像生成技能)
@@ -65,10 +65,9 @@ Generate AI videos and images with Vidu (生数) via `vidu-cli` — text-to-imag
 
 ## Setup
 
-1. Install dependencies:
+1. Install vidu-cli:
    ```bash
-   cd scripts
-   pip install -r requirements.txt
+   cargo install vidu-cli
    ```
 2. Obtain a VIDU token (e.g. from the official Vidu console).
 3. Set environment variables:
@@ -76,7 +75,7 @@ Generate AI videos and images with Vidu (生数) via `vidu-cli` — text-to-imag
    - `export VIDU_BASE_URL=https://service.vidu.cn` (mainland China / 国内, default / 默认) or `https://service.vidu.com` (overseas / 海外)
 4. Verify installation:
    ```bash
-   ./scripts/vidu-cli task submit --help
+   vidu-cli task submit --help
    ```
 
 ---
@@ -324,6 +323,6 @@ Present results as a list: `id`, `version`, `name`, `description`, `category`.
 
 ---
 
-## Fallback (no Python)
+## Fallback (no Rust/Cargo)
 
-If the environment **cannot** run Python 3, execution via `vidu-cli` is not possible. Tell the user that this skill requires Python 3 with `requests` and `Pillow` packages, and point them to **references/parameters.md** for task parameter details.
+If the environment **cannot** run `cargo` or install `vidu-cli`, execution is not possible. Tell the user that this skill requires Rust toolchain and `vidu-cli` (install via `cargo install vidu-cli`), and point them to **references/parameters.md** for task parameter details.
