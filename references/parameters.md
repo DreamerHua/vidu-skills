@@ -1,86 +1,175 @@
 # Vidu Task Parameters Reference
 
-## 任务支持列表 (Supported task list)
+## Task Support Matrix
 
-模型版本: **Q3** → `model_version: "3.2"`；**Q2** → `model_version: "3.1"`。
-
-| 任务类型     | type              | 输入                                           | 模型 | 时长(秒) | 宽高比                    | transition                     | 清晰度              |
-| ------------ | ----------------- | ---------------------------------------------- | ---- | -------- | ------------------------- | ------------------------------ | ------------------- |
-| 文生图       | text2image        | 一段文字                                       | Q2   | 0        | 4:3, 3:4, 1:1, 9:16, 16:9 | 不传                           | 1080p, 2K(默认), 4K |
-| 文生视频     | text2video        | 一段文字                                       | Q3   | 1–16     | 16:9, 9:16, 1:1, 4:3, 3:4 | pro(电影大片), speed(闪电出片) | 1080p               |
-| 文生视频     | text2video        | 一段文字                                       | Q2   | 2–8      | 16:9, 9:16, 1:1, 4:3, 3:4 | 不传                           | 1080p               |
-| 图生视频     | img2video         | **一张图 + 一段文字**                          | Q3   | 1–16     | 依据输入图，**不传**      | pro, speed                     | 1080p               |
-| 图生视频     | img2video         | 一张图 + 一段文字                              | Q2   | 2–8      | 依据输入图，不传          | pro, speed                     | 1080p               |
-| 首尾帧生视频 | headtailimg2video | **两张图 + 一段文字**                          | Q3   | 1–16     | —                         | pro, speed                     | 1080p               |
-| 首尾帧生视频 | headtailimg2video | 两张图 + 一段文字                              | Q2   | 2–8      | —                         | pro, speed                     | 1080p               |
-| 参考生图     | reference2image   | **图+主体+文字（文字必填；图+主体合计最多7）** | Q2   | 0        | 4:3, 3:4, 1:1, 9:16, 16:9 | **不传**                       | 1080p, 2K, 4K       |
-| 参考生视频   | character2video   | **图+主体+文字（文字必填；图+主体合计最多7）** | Q3   | 1–16     | 16:9, 9:16, 1:1, 4:3, 3:4 | **不传**                       | 1080p               |
-| 参考生视频   | character2video   | **图+主体+文字（文字必填；图+主体合计最多7）** | Q2   | 2–8      | 16:9, 9:16, 1:1, 4:3, 3:4 | **不传**                       | 1080p               |
-
-- **文生图**: 只传文字。需要设置 duration 为 0，支持分辨率 1080p/2K/4K (默认 2K)。
-- **文生视频**: 只传文字。Q2 时不要传 transition。
-- **图生视频**: 仅 1 张图片 + 1 段文字；宽高比由输入图决定，**不要传 aspect_ratio**。
-- **首尾帧生视频**: 固定 2 张图（首帧、尾帧）+ 1 段文字。
-- **参考生图**: 图+主体+文字（**文字必填**；图+主体数量合计至少1，最多7）；仅 Q2，需要设置 `duration` 为 0，要求传入 `resolution` 与 `aspect_ratio`，**不要传 transition**。
-- **参考生视频**: 图+主体+文字（**文字必填**；图+主体合计最多 7，至少一种）；Q3 模型时长 1-16，Q2 模型时长 2-8，**不要传 transition**。
+| Task Type | CLI Command | Model Version | Duration | Resolution | Aspect Ratio | Transition | Notes |
+|-----------|-------------|---------------|----------|------------|--------------|-----------|-------|
+| text-to-image | `vidu-cli task submit` type: text2image | 3.1, 3.2_fast_m, 3.2_pro_m | 0 | 1080p, 2k, 4k | 4:3, 3:4, 1:1, 9:16, 16:9 | N/A | - |
+| text-to-video | `vidu-cli task submit` type: text2video | 3.0, 3.1, 3.2 | 3.0: 5s; 3.1: 2-8s; 3.2: 1-16s | 1080p | 16:9, 9:16, 1:1, 4:3, 3:4 | 3.2: pro/speed; 3.0/3.1: N/A | - |
+| image-to-video | `vidu-cli upload` + `vidu-cli task submit` type: img2video | 3.0, 3.1, 3.2 | 3.0: 5s; 3.1: 2-8s; 3.2: 1-16s | 1080p | From image (don't pass) | 3.0: creative/stable; 3.1/3.2: pro/speed | 1 image + text |
+| head-tail-image-to-video | `vidu-cli upload` (2x) + `vidu-cli task submit` type: headtailimg2video | 3.0, 3.1, 3.2 | 3.0: 5s; 3.1: 2-8s; 3.2: 1-16s | 1080p | N/A | 3.0: creative/stable; 3.1/3.2: pro/speed | 2 images + text |
+| reference-to-image | `vidu-cli element search` + `vidu-cli task submit` type: reference2image | 3.1, 3.2_fast_m, 3.2_pro_m | 0 | 1080p, 2k, 4k | 4:3, 3:4, 1:1, 9:16, 16:9 | N/A | image+reference ≤7 |
+| reference-to-video | `vidu-cli element search` + `vidu-cli task submit` type: character2video | 3.0, 3.1, 3.1_pro, 3.2 | 3.0: 5s; 3.1: 2-8s; 3.1_pro: -1/2-8s; 3.2: 1-16s | 1080p | 16:9, 9:16, 1:1, 4:3, 3:4 | N/A | image+reference ≤7 |
 
 ---
 
-## Task type (API)
+## CLI Commands
 
-| Value             | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| text2image        | 文生图：prompts 仅文字                                      |
-| text2video        | 文生视频：prompts 仅文字                                    |
-| img2video         | 图生视频：1 张图 + 1 段文字                                 |
-| headtailimg2video | 首尾帧生视频：2 张图 + 1 段文字                             |
-| character2video   | 参考生视频：图+主体+文字（文字必填；图+主体合计最多7）      |
-| reference2image   | 参考生图：图+主体+文字（文字必填；图+主体合计最多7，仅 Q2） |
+### Upload Image
+```bash
+vidu-cli upload <image_path>
+```
+- Auto-detects image dimensions
+- Compresses if > 10MB
+- Returns: `upload_id`, `ssupload_uri`
+
+### Submit Task
+```bash
+vidu-cli task submit \
+  --type <task_type> \
+  --prompt "text prompt" \
+  [--image "ssupload:?id=..."]  \
+  [--material "name:id:version"] \
+  --duration <seconds> \
+  --model-version <version> \
+  [--aspect-ratio <ratio>] \
+  [--transition <mode>] \
+  [--resolution <res>] \
+  [--sample-count <n>] \
+  [--codec <codec>] \
+  [--movement-amplitude <amp>] \
+  [--schedule-mode <mode>]
+```
+
+`--image` and `--material` can be specified multiple times.
+
+### Query Task
+```bash
+vidu-cli task get <task_id>
+```
+- Returns: `state` (created/queueing/processing/success/failed), `media_urls` (if success), `err_code`/`err_msg` (if failed)
+
+### Stream Task Status (SSE)
+```bash
+vidu-cli task sse <task_id>
+```
+
+### Search Community References
+```bash
+vidu-cli element search --keyword "keyword" [--pagesz 20]
+```
+
+### Create Reference
+```bash
+vidu-cli upload image1.jpg
+# → {"ok": true, "ssupload_uri": "ssupload:?id=123"}
+
+vidu-cli element preprocess \
+  --name "my_character" \
+  --image "ssupload:?id=123"
+
+vidu-cli element create \
+  --id "<id_from_preprocess>" \
+  --name "my_character" \
+  --image "ssupload:?id=123" \
+  --description "description text"
+```
 
 ---
 
-## Input
+## Input Parameters
 
-### prompts (array)
+### type (required)
+- `text2image` — Text to image
+- `text2video` — Text to video
+- `img2video` — Image to video
+- `headtailimg2video` — Head-tail frames to video
+- `reference2image` — Reference to image
+- `character2video` — Reference to video
 
-- **Text prompt**: `{"type": "text", "content": "<string>"}`. Max length 4096.
-- **Image prompt**: `{"type": "image", "content": "ssupload:?id=<upload_id>", "src_imgs": [...], "selected_region": {...}}`. Optional: `src_imgs`, `selected_region`.
+### input.prompts (required, array)
+- **Text prompt**: `{"type": "text", "content": "<string>"}` (max 4096 chars)
+- **Image prompt**: `{"type": "image", "content": "ssupload:?id=<upload_id>"}`
 
-Order: for headtailimg2video use [text, image1, image2] (首帧、尾帧). For character2video and reference2image: **text prompt required**; image + material combined at most 7 (图+主体合计最多7).
+Order for headtailimg2video: [text, image1, image2]
+Order for reference tasks: text required; image + material combined ≤7
 
-### input.editor_mode
+### input.enhance (required)
+- Must be `true` (enables recaption)
 
-| Value  | Description |
-| ------ | ----------- |
-| normal | Default     |
-
-### input.enhance
-
-- **必填，必须为 `true`**：recaption text prompts. Always pass `"enhance": true`.
-
----
-
-## Settings (by task type)
-
-| Field         | text2image                | reference2image           | text2video                | img2video         | headtailimg2video | character2video           |
-| ------------- | ------------------------- | ------------------------- | ------------------------- | ----------------- | ----------------- | ------------------------- |
-| duration      | 0                         | 0                         | Q3: 1–16; Q2: 2–8         | Q3: 1–16; Q2: 2–8 | Q3: 1–16; Q2: 2–8 | Q3: 1–16; Q2: 2–8         |
-| aspect_ratio  | 4:3, 3:4, 1:1, 9:16, 16:9 | 4:3, 3:4, 1:1, 9:16, 16:9 | 16:9, 9:16, 1:1, 4:3, 3:4 | **不传**          | —                 | 16:9, 9:16, 1:1, 4:3, 3:4 |
-| transition    | **不传**                  | **不传**                  | Q3: pro, speed; Q2: 不传  | pro, speed        | pro, speed        | **不传**                  |
-| resolution    | 1080p, 2K, 4K             | 1080p, 2K, 4K             | 1080p                     | 1080p             | 1080p             | 1080p                     |
-| model_version | 3.1                       | 3.1 (Q2 only)             | 3.2 (Q3) or 3.1 (Q2)      | 3.2 or 3.1        | 3.2 or 3.1        | 3.2 (Q3) or 3.1 (Q2)      |
-
-- **transition "pro"**: 电影大片.
-- **transition "speed"**: 闪电出片.
+### input.editor_mode (optional)
+- Default: `"normal"`
 
 ---
 
-## File upload metadata
+## Settings Parameters
 
-For **CreateUpload** (images):
+### model_version (required)
+- `3.0` — Q1
+- `3.1` — Q2 (text2image, reference2image, 2-8s videos)
+- `3.2` — Q3 (1-16s videos)
+- `3.1_pro` — Q2 pro (character2video only)
+- `3.2_fast_m` — Q3 fast mode (text2image/reference2image only, 2k/4k)
+- `3.2_pro_m` — Q3 pro mode (text2image/reference2image only, 2k/4k)
 
-- `metadata.image-height`: integer string (pixels).
-- `metadata.image-width`: integer string (pixels).
-- `scene`: `"vidu"`.
+### duration (required for video, 0 for image)
+- text2image: `0`
+- text2video/img2video/headtailimg2video/character2video:
+  - 3.0/3.2: 1-16 seconds
+  - 3.1: 2-8 seconds
+- reference2image: `0`
 
-Same dimensions must be sent as `x-amz-meta-image-height` and `x-amz-meta-image-width` on the PUT to put_url.
+### resolution (optional, default 1080p)
+- text2image: `1080p` (3.1), `2k`/`4k` (3.2_fast_m)
+- reference2image: `1080p`, `2k`, `4k`
+- video tasks: `1080p` only
+
+### aspect_ratio (optional, task-dependent)
+- text2image/reference2image: `4:3`, `3:4`, `1:1`, `9:16`, `16:9`
+- text2video/character2video: `16:9`, `9:16`, `1:1`, `4:3`, `3:4`
+- img2video: **don't pass** (derived from image)
+- headtailimg2video: **don't pass**
+
+### transition (optional, video only)
+- text2video (3.0/3.2): `pro` (cinematic), `speed` (fast)
+- text2video (3.1): **don't pass**
+- img2video/headtailimg2video: `pro`, `speed`
+- reference tasks: **don't pass**
+
+### Other settings
+- `sample_count`: 1 (default)
+- `schedule_mode`: `normal` (default)
+- `codec`: `h265` (default)
+- `use_trial`: `true`/`false`
+- `movement_amplitude`: `auto` (optional)
+
+---
+
+## Error Handling
+
+All CLI commands return structured JSON:
+
+**Success:**
+```json
+{"ok": true, "task_id": "...", ...}
+```
+
+**Failure:**
+```json
+{"ok": false, "error": {"type": "client_error|http_error|network_error", "message": "...", "http_status": 422, "code": "invalid_param"}}
+```
+
+**Never guess error causes** — read the `error` object exactly as returned.
+
+---
+
+## Validation Rules
+
+- `type` must be valid task type
+- `model_version` must support the task type
+- `duration` must be in valid range for model + task
+- `resolution` must be supported by task type
+- `aspect_ratio` must not be passed for img2video/headtailimg2video
+- `transition` must not be passed for reference tasks or text2image
+- `enhance` must be `true`
+- Image + reference count ≤ 7 for reference tasks
